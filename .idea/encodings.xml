@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" addBOMForNewFiles="with NO BOM">
+    <file url="file://$PROJECT_DIR$" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/kafka-demo" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/kafka-demo/src/main/java/com/zyf/config/KafkaInitialConfiguration.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/kafka-demo/src/main/java/com/zyf/producer/MyProducer.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../xxl-job" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../xxl-job/xxl-job-admin" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../xxl-job/xxl-job-core" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../xxl-job/xxl-job-executor-samples" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../xxl-job/xxl-job-executor-samples/xxl-job-executor-sample-frameless" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../xxl-job/xxl-job-executor-samples/xxl-job-executor-sample-springboot" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../xxl-job/xxl-job-executor-samples/xxl-job-executor-sample-springboot/src/main/java/com/xxl/job/executor/service/jobhandler/SampleXxlJob.java" charset="UTF-8" />
+  </component>
+</project>
