@@ -58,7 +58,7 @@ public class HashMap<K, V> implements Map<K, V> {
         int index = hash(k);
         //Entry<K, V> entry = table[index];
         Entry<K, V> entry = findValue(table[index], k);
-        return entry.getValue();
+        return entry==null?null:entry.getValue();
     }
 
     private Entry<K, V> findValue(Entry<K, V> entry, K k) {
