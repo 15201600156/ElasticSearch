@@ -6,7 +6,9 @@ import com.zyf.entity.UserEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,6 +16,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+
+/**
+ * TermQueryBuilder 对词条进行完全匹配   计算机=计算机
+ * WildcardQueryBuilder  对词条进行模糊匹配  "计算机" =  *算*
+ * QueryStringQueryBuilder 对查询的词进行分词 再进行匹配
+ */
 @RestController
 @RequestMapping("/es")
 @Slf4j
@@ -185,4 +193,181 @@ public class EsController {
         return userEntities;
    }
     //#endregion
+
+
+
+    @RequestMapping("/matchAllQuery")
+    public List<UserEntity> matchAllQuery() {
+        QueryBuilder queryBuilder=QueryBuilders.matchAllQuery();
+        Iterable<UserEntity> search = userEntityReposiory.search(queryBuilder);
+        Iterator<UserEntity> iterator = search.iterator();
+        List<UserEntity> userEntities = new ArrayList<>();
+        while (iterator.hasNext()) {
+            userEntities.add(iterator.next());
+        }
+        return userEntities;
+    }
+
+    @RequestMapping("/matchQuery")
+    public List<UserEntity> matchQuery() {
+        QueryBuilder queryBuilder=QueryBuilders.matchQuery("name","张");
+        Iterable<UserEntity> search = userEntityReposiory.search(queryBuilder);
+        Iterator<UserEntity> iterator = search.iterator();
+        List<UserEntity> userEntities = new ArrayList<>();
+        while (iterator.hasNext()) {
+            userEntities.add(iterator.next());
+        }
+        return userEntities;
+    }
+
+    /**
+     * 搜索一个值，但是指定多个字段查询
+     * @return
+     */
+    @RequestMapping("/multiMatchQuery")
+    public List<UserEntity> multiMatchQuery() {
+        QueryBuilder queryBuilder=QueryBuilders.multiMatchQuery("张","name");
+        Iterable<UserEntity> search = userEntityReposiory.search(queryBuilder);
+        Iterator<UserEntity> iterator = search.iterator();
+        List<UserEntity> userEntities = new ArrayList<>();
+        while (iterator.hasNext()) {
+            userEntities.add(iterator.next());
+        }
+        return userEntities;
+    }
+
+    /**
+     * 通配符 查询
+     * *代表0个或多个字符
+     * ？代表任意一个字符
+     * @return
+     */
+    @RequestMapping("/wildcardQuery")
+    public List<UserEntity> wildcardQuery() {
+        QueryBuilder queryBuilder=QueryBuilders.wildcardQuery("name","张*");
+        Iterable<UserEntity> search = userEntityReposiory.search(queryBuilder);
+        Iterator<UserEntity> iterator = search.iterator();
+        List<UserEntity> userEntities = new ArrayList<>();
+        while (iterator.hasNext()) {
+            userEntities.add(iterator.next());
+        }
+        return userEntities;
+    }
+
+    /**
+     * 模糊查询
+     * @return
+     */
+    @RequestMapping("/fuzzyQuery")
+    public List<UserEntity> fuzzyQuery() {
+        QueryBuilder queryBuilder=QueryBuilders.fuzzyQuery("name","张");
+        Iterable<UserEntity> search = userEntityReposiory.search(queryBuilder);
+        Iterator<UserEntity> iterator = search.iterator();
+        List<UserEntity> userEntities = new ArrayList<>();
+        while (iterator.hasNext()) {
+            userEntities.add(iterator.next());
+        }
+        return userEntities;
+    }
+
+    /**
+     * 类型查询
+     * @return
+     */
+    @RequestMapping("/typeQuery")
+    public List<UserEntity> typeQuery() {
+        QueryBuilder queryBuilder=QueryBuilders.typeQuery("user");
+        Iterable<UserEntity> search = userEntityReposiory.search(queryBuilder);
+        Iterator<UserEntity> iterator = search.iterator();
+        List<UserEntity> userEntities = new ArrayList<>();
+        while (iterator.hasNext()) {
+            userEntities.add(iterator.next());
+        }
+        return userEntities;
+    }
+
+
+    /**
+     * 多个ID查询
+     * @return
+     */
+    @RequestMapping("/idsQuery")
+    public List<UserEntity> idsQuery() {
+        QueryBuilder queryBuilder=QueryBuilders.idsQuery("user").addIds("1","2","3","4","5","6","7");
+        Iterable<UserEntity> search = userEntityReposiory.search(queryBuilder);
+        Iterator<UserEntity> iterator = search.iterator();
+        List<UserEntity> userEntities = new ArrayList<>();
+        while (iterator.hasNext()) {
+            userEntities.add(iterator.next());
+        }
+        return userEntities;
+    }
+
+    /**
+     * 聚合查询 没有实现 明天查
+     * @return
+     */
+    @RequestMapping("/aggregationBuilders")
+    public List<UserEntity> aggregationBuilders() {
+        NativeSearchQueryBuilder nativeSearchQueryBuilder=new NativeSearchQueryBuilder();
+        //  MaxAggregationBuilder builder= AggregationBuilders.max("aggMax").field("age"); //求age的最大值
+        nativeSearchQueryBuilder.addAggregation(AggregationBuilders.max("agemax").field("age"));
+        Iterable<UserEntity> search = userEntityReposiory.search(nativeSearchQueryBuilder.build());
+        Iterator<UserEntity> iterator = search.iterator();
+        List<UserEntity> userEntities = new ArrayList<>();
+        while (iterator.hasNext()) {
+            userEntities.add(iterator.next());
+        }
+        return userEntities;
+    }
+
+
+
+    /**
+     * 查询  哪个地方用需要查询一下
+     * @return
+     */
+    @RequestMapping("/commonTermsQuery")
+    public List<UserEntity> commonTermsQuery() {
+        QueryBuilder queryBuilder=QueryBuilders.commonTermsQuery("name","张");
+        Iterable<UserEntity> search = userEntityReposiory.search(queryBuilder);
+        Iterator<UserEntity> iterator = search.iterator();
+        List<UserEntity> userEntities = new ArrayList<>();
+        while (iterator.hasNext()) {
+            userEntities.add(iterator.next());
+        }
+        return userEntities;
+    }
+
+    /**
+     * 全文搜索 不需要写字段   +张 代表含有张的  -张 不含有张的      +张 -军  就是含有张 不含有军的        完全满足这个条件的才会出来
+     * @return
+     */
+    @RequestMapping("/queryStringQuery")
+    public List<UserEntity> queryStringQuery() {
+        QueryBuilder queryBuilder=QueryBuilders.queryStringQuery("+张 -军");
+        Iterable<UserEntity> search = userEntityReposiory.search(queryBuilder);
+        Iterator<UserEntity> iterator = search.iterator();
+        List<UserEntity> userEntities = new ArrayList<>();
+        while (iterator.hasNext()) {
+            userEntities.add(iterator.next());
+        }
+        return userEntities;
+    }
+    /**
+     * 全文搜索 不需要写字段   +张 代表含有张的  -张 不含有张的      +张 -军  就是含有张 不含有军的        只需要满足一个就可以
+     * @return
+     */
+    @RequestMapping("/simpleQueryStringQuery")
+    public List<UserEntity> simpleQueryStringQuery() {
+        QueryBuilder queryBuilder=QueryBuilders.simpleQueryStringQuery("+a -张");
+        Iterable<UserEntity> search = userEntityReposiory.search(queryBuilder);
+        Iterator<UserEntity> iterator = search.iterator();
+        List<UserEntity> userEntities = new ArrayList<>();
+        while (iterator.hasNext()) {
+            userEntities.add(iterator.next());
+        }
+        return userEntities;
+    }
 }
+
