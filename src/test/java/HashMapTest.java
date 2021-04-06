@@ -1,6 +1,8 @@
-import com.zyf.service.Map;
-import com.zyf.service.impl.HashMap;
+
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class HashMapTest {
 

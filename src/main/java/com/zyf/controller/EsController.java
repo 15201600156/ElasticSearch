@@ -4,9 +4,24 @@ import com.zyf.dao.UserEntityReposiory;
 import com.zyf.dao.UserReposiory;
 import com.zyf.entity.UserEntity;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.max.MaxAggregationBuilder;
+import org.hibernate.validator.resourceloading.AggregateResourceBundleLocator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.core.ResultsExtractor;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -185,4 +200,43 @@ public class EsController {
         return userEntities;
    }
     //#endregion
+
+
+
+
+
+
+    @Autowired
+    ElasticsearchTemplate elasticsearchTemplate;
+
+    @RequestMapping("/aggregationBuilder")
+    public List<UserEntity> aggregationBuilder() {
+
+       MaxAggregationBuilder field = AggregationBuilders.max("max_age").field("age");
+
+
+        NativeSearchQueryBuilder searchQuery=new NativeSearchQueryBuilder();
+        searchQuery.withQuery(QueryBuilders.matchAllQuery());
+        searchQuery.addAggregation(field);
+
+
+
+        List<UserEntity> queryForList = elasticsearchTemplate.queryForList(searchQuery.build(), UserEntity.class);
+        //3.3方法3,通过elasticSearch模板elasticsearchTemplate.query()方法查询,获得聚合(常用)
+        Aggregations aggregations = elasticsearchTemplate.query(searchQuery.build(), new ResultsExtractor<Aggregations>() {
+            @Override
+            public Aggregations extract(SearchResponse response) {
+                return response.getAggregations();
+            }
+        });
+
+
+        Iterable<UserEntity> search = userEntityReposiory.search(searchQuery.build());
+        Iterator<UserEntity> iterator = search.iterator();
+        List<UserEntity> userEntities = new ArrayList<>();
+        while (iterator.hasNext()) {
+            userEntities.add(iterator.next());
+        }
+        return userEntities;
+    }
 }
